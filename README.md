@@ -1,0 +1,1 @@
+# promoted-product-plugin
