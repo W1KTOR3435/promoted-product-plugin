@@ -1,0 +1,8 @@
+{
+    "name": "wiktor/promoted-product-plugin",
+    "autoload": {
+        "psr-4": {
+            "PromotedProduct\\": "src/"
+        }
+    }
+}
