@@ -6,5 +6,6 @@ class Plugin {
     public static function init() {
         Settings::init();
         ProductEditor::init();
+        Frontend::init();
     }
 }
