@@ -29,33 +29,26 @@ class Frontend {
 			return;
 		}
 
-		$transient_key         = 'promoted_product_' . $promoted_product_id;
-		$promoted_product_data = get_transient( $transient_key );
-
-		if ( false === $promoted_product_data ) {
-			$product = wc_get_product( $promoted_product_id );
-			if ( ! $product ) {
-				return;
-			}
-
-			$promoted_title = get_option( 'promoted_product_title', 'FLASH SALE:' );
-			$bg_color       = get_option( 'promoted_product_bg_color', '#000000' );
-			$text_color     = get_option( 'promoted_product_text_color', '#ffffff' );
-
-			$custom_title = get_post_meta( $promoted_product_id, '_promoted_product_custom_title', true );
-			$title        = $custom_title ? $custom_title : $product->get_name();
-			$product_link = get_permalink( $promoted_product_id );
-
-			$promoted_product_data = array(
-				'title'          => $title,
-				'product_link'   => $product_link,
-				'promoted_title' => $promoted_title,
-				'bg_color'       => $bg_color,
-				'text_color'     => $text_color,
-			);
-
-			set_transient( $transient_key, $promoted_product_data, HOUR_IN_SECONDS );
+		$product = wc_get_product( $promoted_product_id );
+		if ( ! $product ) {
+			return;
 		}
+
+		$promoted_title = get_option( 'promoted_product_title', 'FLASH SALE:' );
+		$bg_color       = get_option( 'promoted_product_bg_color', '#000000' );
+		$text_color     = get_option( 'promoted_product_text_color', '#ffffff' );
+
+		$custom_title = get_post_meta( $promoted_product_id, '_promoted_product_custom_title', true );
+		$title        = $custom_title ? $custom_title : $product->get_name();
+		$product_link = get_permalink( $promoted_product_id );
+
+		$promoted_product_data = array(
+			'title'          => $title,
+			'product_link'   => $product_link,
+			'promoted_title' => $promoted_title,
+			'bg_color'       => $bg_color,
+			'text_color'     => $text_color,
+		);
 
 		?>
 		<div style="width: 100%; background-color: <?php echo esc_attr( $promoted_product_data['bg_color'] ); ?>; text-align: center; padding: 10px;">
