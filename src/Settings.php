@@ -65,11 +65,13 @@ class Settings {
     }
 
     public static function output_custom_html( $value ) {
-        echo '<tr valign="top">';
-        echo '<th scope="row" class="titledesc">' . esc_html( $value['title'] ) . '</th>';
-        echo '<td class="forminp forminp-' . sanitize_title( $value['type'] ) . '">';
-        echo wp_kses_post( $value['desc'] );
-        echo '</td>';
-        echo '</tr>';
+        ?>
+        <tr valign="top">
+            <th scope="row" class="titledesc"><?php echo esc_html( $value['title'] ); ?></th>
+            <td class="forminp forminp-<?php echo sanitize_title( $value['type'] ); ?>">
+                <?php echo wp_kses_post( $value['desc'] ); ?>
+            </td>
+        </tr>
+        <?php
     }
 }
