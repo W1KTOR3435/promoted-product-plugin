@@ -4,5 +4,24 @@
         "psr-4": {
             "PromotedProduct\\": "src/"
         }
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "^3.6",
+        "wp-coding-standards/wpcs": "^2.3",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "phpcompatibility/phpcompatibility-wp": "^2.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "phpcs": [
+            "vendor/bin/phpcs --standard=WordPress src/"
+        ],
+        "phpcbf": [
+            "vendor/bin/phpcbf --standard=WordPress src/"
+        ]
     }
 }
