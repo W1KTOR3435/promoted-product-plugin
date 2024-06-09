@@ -6,6 +6,7 @@ class ProductEditor {
     public static function init() {
         add_action( 'woocommerce_product_options_general_product_data', [ __CLASS__, 'add_promoted_fields' ] );
         add_action( 'woocommerce_process_product_meta', [ __CLASS__, 'save_promoted_fields' ] );
+        add_action('check_promoted_product_expiration', [__CLASS__, 'check_promoted_product_expiration_handler']);
     }
 
     public static function add_promoted_fields() {
@@ -59,6 +60,15 @@ class ProductEditor {
         update_post_meta( $post_id, '_promoted_product_expiration', $promoted_product_expiration );
         update_post_meta( $post_id, '_promoted_product_expiration_date', $expiration_date );
 
+        if ($promoted_product_expiration === 'yes' && !empty($expiration_date)) {
+            $timestamp = self::get_timestamp_from_date($expiration_date);
+            if ($timestamp > current_time('timestamp', true)) {
+                wp_clear_scheduled_hook('check_promoted_product_expiration', [$post_id]);
+                wp_schedule_single_event($timestamp, 'check_promoted_product_expiration', [$post_id]);
+                error_log("Scheduled expiration event for product $post_id at $expiration_date ($timestamp)");
+            }
+        }
+
         if ( $promote_product === 'yes' ) {
             $current_promoted = get_option( 'promoted_product' );
             if ( $current_promoted && $current_promoted != $post_id ) {
@@ -71,5 +81,22 @@ class ProductEditor {
                 delete_option( 'promoted_product' );
             }
         }
+    }
+
+    public static function check_promoted_product_expiration_handler($post_id) {
+        $expiration_date = get_post_meta($post_id, '_promoted_product_expiration_date', true);
+        if (self::get_timestamp_from_date($expiration_date) <= current_time('timestamp', true)) {
+            update_post_meta($post_id, '_promote_product', 'no');
+            $current_promoted = get_option('promoted_product');
+            if ($current_promoted == $post_id) {
+                delete_option('promoted_product');
+            }
+        }
+    }
+
+    private static function get_timestamp_from_date($date_string) {
+        $timezone = new \DateTimeZone(wp_timezone_string());
+        $datetime = new \DateTime($date_string, $timezone);
+        return $datetime->getTimestamp();
     }
 }
