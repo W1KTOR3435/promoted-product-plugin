@@ -97,14 +97,19 @@ class ProductEditor {
 		update_post_meta( $post_id, '_promote_product', $promote_product );
 		update_post_meta( $post_id, '_promoted_product_custom_title', $custom_title );
 		update_post_meta( $post_id, '_promoted_product_expiration', $promoted_product_expiration );
-		update_post_meta( $post_id, '_promoted_product_expiration_date', $expiration_date );
 
 		if ( 'yes' === $promoted_product_expiration && ! empty( $expiration_date ) ) {
 			$timestamp = self::get_timestamp_from_date( $expiration_date );
+
 			if ( $timestamp > time() ) {
 				wp_clear_scheduled_hook( 'check_promoted_product_expiration', array( $post_id ) );
 				wp_schedule_single_event( $timestamp, 'check_promoted_product_expiration', array( $post_id ) );
+				update_post_meta( $post_id, '_promoted_product_expiration_date', $expiration_date );
+			} else {
+				delete_post_meta( $post_id, '_promoted_product_expiration_date' );
 			}
+		} else {
+			delete_post_meta( $post_id, '_promoted_product_expiration_date' );
 		}
 
 		if ( 'yes' === $promote_product ) {
@@ -128,11 +133,20 @@ class ProductEditor {
 	 * @return void
 	 */
 	public static function check_promoted_product_expiration_handler( $post_id ) {
-		$expiration_date = get_post_meta( $post_id, '_promoted_product_expiration_date', true );
-		if ( self::get_timestamp_from_date( $expiration_date ) <= time() ) {
+		$expiration_date             = get_post_meta( $post_id, '_promoted_product_expiration_date', true );
+		$promoted_product_expiration = get_post_meta( $post_id, '_promoted_product_expiration', true );
+
+		if ( 'yes' === $promoted_product_expiration && ! empty( $expiration_date ) && self::get_timestamp_from_date( $expiration_date ) <= time() ) {
+			// Set promote product to no.
 			update_post_meta( $post_id, '_promote_product', 'no' );
+
+			// Delete expiration-related meta values.
+			delete_post_meta( $post_id, '_promoted_product_expiration' );
+			delete_post_meta( $post_id, '_promoted_product_expiration_date' );
+
+			// Check if this product is the currently promoted product and delete the option if so.
 			$current_promoted = get_option( 'promoted_product' );
-			if ( $current_promoted == $post_id ) { // phpcs:ignore
+            if ( $current_promoted == $post_id ) { // phpcs:ignore
 				delete_option( 'promoted_product' );
 			}
 		}

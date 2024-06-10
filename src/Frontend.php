@@ -29,8 +29,11 @@ class Frontend {
 			return;
 		}
 
+		// Check if the promotion has expired.
+		ProductEditor::check_promoted_product_expiration_handler( $promoted_product_id );
+
 		$product = wc_get_product( $promoted_product_id );
-		if ( ! $product ) {
+		if ( ! $product || 'yes' !== get_post_meta( $promoted_product_id, '_promote_product', true ) ) {
 			return;
 		}
 
